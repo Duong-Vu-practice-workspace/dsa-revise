@@ -10,64 +10,99 @@ struct ListNode {
     ListNode(int x, ListNode* next) : val(x), next(next) {}
 };
 
-ListNode* removeKthNode(ListNode* head, int k)
-{
-    if (k <= 0)
+ListNode *getIntersectionNode(ListNode *headA, ListNode *headB){
+    ListNode* pointerA;
+    ListNode* pointerB;
+    pointerA = headA;
+    pointerB = headB;
+    while (pointerA != pointerB)
     {
-        return head;
-    }
-    ListNode* dummy = new ListNode(-1);
-    dummy->next = head;
-    ListNode* trailer = dummy;
-    ListNode* leader = dummy;
-    for (int i = 0; i < k; i++)
-    {
-        leader = leader->next;
-        if (leader == nullptr)
+        if (pointerA != nullptr)
         {
-            return head;
+            pointerA = pointerA->next;
+        } else
+        {
+            pointerA = headB;
+        }
+
+        if (pointerB != nullptr)
+        {
+            pointerB = pointerB->next;
+        } else
+        {
+            pointerB = headA;
         }
     }
-    while (leader->next != nullptr)
-    {
-        leader = leader->next;
-        trailer = trailer->next;
-
-    }
-    trailer->next = trailer->next->next;
-    return dummy->next;
-
-
+    return pointerA;
 }
-
-int main()
+    int main()
 {
 #ifndef ONLINE_JUDGE
     freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 #endif
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int a, b, intersectIdx;
+        cin >> a >> b >> intersectIdx;
+        // intersectIdx: -1 means no intersection, 0-based index in list A where B starts sharing
+        
+        vector<ListNode*> nodesA;
+        ListNode* nodeA = nullptr;
+        ListNode* tailA = nullptr;
 
-    int n;
-    cin >> n;
-    int k;
-    cin >> k;
+        for (int i = 0; i < a; ++i) {
+            int x; cin >> x;
+            ListNode* node = new ListNode(x);
+            if (!nodeA)
+            {
+                nodeA = node;
+                tailA = node;
+            }
+            else
+            {
+                tailA->next = node;
+                tailA = tailA->next;
+            }
+            nodesA.push_back(node);
+        }
 
-    ListNode* head = nullptr;
-    ListNode* tail = nullptr;
-    for (int i = 0; i < n; ++i) {
-        int x; cin >> x;
-        ListNode* node = new ListNode(x);
-        if (!head) head = tail = node;
-        else { tail->next = node; tail = node; }
+        ListNode* nodeB = nullptr;
+        ListNode* tailB = nullptr;
+        for (int i = 0; i < b; ++i) {
+            int x; cin >> x;
+            ListNode* node = new ListNode(x);
+            if (!nodeB)
+            {
+                nodeB = node;
+                tailB = node;
+            }
+            else
+            {
+                tailB->next = node;
+                tailB = tailB->next;
+            }
+        }
+
+        // Create intersection: connect tail of B to a node in A
+        if (intersectIdx >= 0 && intersectIdx < nodesA.size() && tailB != nullptr) {
+            tailB->next = nodesA[intersectIdx];
+        }
+
+        ListNode* rev = getIntersectionNode(nodeA, nodeB);
+
+        if (rev != nullptr)
+        {
+            cout << rev->val;
+        } else
+        {
+            cout << "-1";
+        }
+        cout << '\n';
     }
 
-    ListNode* rev = removeKthNode(head, k);
-
-    for (ListNode* p = rev; p != nullptr; p = p->next) {
-        cout << p->val;
-        if (p->next) cout << ' ';
-    }
-    cout << '\n';
 
     return 0;
 }
